@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Daftar Cash Flow</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Aplikasi Cash Flow</h2>
+    <a href="/cashflows/add" class="btn btn-primary mb-3">+ Tambah Transaksi</a>
+    
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Label</th>
+                <th>Sumber</th>
+                <th>Tipe</th>
+                <th>Nominal</th>
+                <th>Deskripsi</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Looping data dari Java Controller -->
+            <tr th:each="row : ${listCashFlow}">
+                <td th:text="${row.label}"></td>
+                <td th:text="${row.source}"></td>
+                <td>
+                    <!-- Warna badge: Hijau kalau Pemasukan, Merah kalau Pengeluaran -->
+                    <span th:text="${row.type}" 
+                          th:class="${row.type == 'Pemasukan' ? 'badge bg-success' : 'badge bg-danger'}">
+                    </span>
+                </td>
+                <td th:text="'Rp ' + ${row.amount}"></td>
+                <td th:text="${row.description}"></td>
+                <td>
+                    <a th:href="@{/cashflows/edit/{id}(id=${row.id})}" class="btn btn-warning btn-sm">Edit</a>
+                    <a th:href="@{/cashflows/delete/{id}(id=${row.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Hapus data ini?')">Hapus</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

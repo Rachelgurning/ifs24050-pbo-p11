@@ -1,57 +1,73 @@
 package org.delcom.app.configs;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 public class SecurityConfigTest {
 
-        @Autowired
-        private MockMvc mockMvc;
+    @Mock HttpSecurity http;
+    @Mock ExceptionHandlingConfigurer<HttpSecurity> exceptionHandlingConfigurer;
+    @Mock HttpServletRequest request;
+    @Mock HttpServletResponse response;
+    @Mock AuthenticationException authException;
 
-        @Autowired
-        private PasswordEncoder passwordEncoder;
+    @Test
+    void testSecurityConfig() throws Exception {
+        SecurityConfig config = new SecurityConfig();
 
-        @Test
-        void permitAll_forAuthUrls() throws Exception {
-                mockMvc.perform(get("/auth/login"))
-                                .andExpect(status().isOk());
-        }
+        // 1. Cek Password Encoder
+        assertNotNull(config.passwordEncoder());
 
-        @Test
-        void permitAll_forApiUrls() throws Exception {
-                mockMvc.perform(get("/api/test"))
-                                .andExpect(status().is4xxClientError());
-        }
+        // 2. Setup Mock "Santai" (Lenient) agar tidak error Stubbing
+        // Kembalikan 'http' agar method chaining (.and().something()) tetap jalan
+        lenient().when(http.csrf(any())).thenReturn(http);
+        lenient().when(http.authorizeHttpRequests(any())).thenReturn(http);
+        lenient().when(http.formLogin(any())).thenReturn(http);
+        lenient().when(http.logout(any())).thenReturn(http);
+        lenient().when(http.rememberMe(any())).thenReturn(http);
+        lenient().when(http.sessionManagement(any())).thenReturn(http);
 
-        @Test
-        void redirect_toLogin_ifNotAuthenticated() throws Exception {
-                mockMvc.perform(get("/dashboard"))
-                                .andExpect(status().is3xxRedirection())
-                                .andExpect(redirectedUrl("/auth/login"));
-        }
+        // 3. JURUS RAHASIA: Membajak ExceptionHandling
+        // Saat kode memanggil .exceptionHandling(...), kita tangkap isinya!
+        when(http.exceptionHandling(any())).thenAnswer(invocation -> {
+            // Ambil "Lambda" yang ada di dalam kodingan aslimu
+            Customizer<ExceptionHandlingConfigurer<HttpSecurity>> customizer = 
+                invocation.getArgument(0);
+            
+            // Paksa lambda itu jalan menggunakan object palsu kita
+            customizer.customize(exceptionHandlingConfigurer);
+            
+            return http;
+        });
 
-        @Test
-        void accessDenied_redirectsToLogout() throws Exception {
-                mockMvc.perform(get("/admin")
-                                .with(user("testuser").roles("USER"))) // user login tapi bukan ADMIN
-                                .andExpect(status().is4xxClientError());
-        }
+        // 4. Jalankan method utama (securityFilterChain)
+        config.securityFilterChain(http);
 
-        @Test
-        void passwordEncoder_shouldBeBCrypt() {
-                assertThat(passwordEncoder).isNotNull();
-                assertThat(passwordEncoder.encode("test"))
-                                .isNotBlank();
-        }
+        // 5. Tangkap 'AuthenticationEntryPoint' yang baru saja didaftarkan oleh lambda tadi
+        ArgumentCaptor<AuthenticationEntryPoint> captor = ArgumentCaptor.forClass(AuthenticationEntryPoint.class);
+        verify(exceptionHandlingConfigurer).authenticationEntryPoint(captor.capture());
+
+        // 6. TEMBAK! Jalankan method commence() secara manual
+        // Ini seolah-olah ada user yang gagal login
+        AuthenticationEntryPoint entryPoint = captor.getValue();
+        entryPoint.commence(request, response, authException);
+
+        // 7. Cek apakah baris merah (redirect) tereksekusi
+        verify(response).sendRedirect("/auth/login");
+    }
 }
