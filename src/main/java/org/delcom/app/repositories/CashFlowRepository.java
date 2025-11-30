@@ -12,24 +12,20 @@ import java.util.UUID;
 
 @Repository
 public interface CashFlowRepository extends JpaRepository<CashFlow, UUID> {
-
-    // Mencari semua cash flow berdasarkan user ID
+    
+    // Ambil semua milik user tertentu
     List<CashFlow> findByUserId(UUID userId);
 
-    // Mencari cash flow berdasarkan ID dan user ID
-    Optional<CashFlow> findByIdAndUserId(UUID id, UUID userId);
+    // Ambil detail spesifik milik user tertentu (Security)
+    Optional<CashFlow> findByUserIdAndId(UUID userId, UUID id);
 
-    // Mencari cash flow berdasarkan user ID dengan pencarian
+    // Fitur Search (Mencari berdasarkan Label atau Description milik user tertentu)
     @Query("SELECT c FROM CashFlow c WHERE c.userId = :userId AND " +
-           "(LOWER(c.source) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(c.label) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%')))")
-    List<CashFlow> findByUserIdWithSearch(@Param("userId") UUID userId, @Param("search") String search);
+           "(LOWER(c.label) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<CashFlow> findByKeyword(@Param("userId") UUID userId, @Param("keyword") String keyword);
 
-    // Mendapatkan semua label unik berdasarkan user ID
-    @Query("SELECT DISTINCT c.label FROM CashFlow c WHERE c.userId = :userId ORDER BY c.label")
+    // Ambil daftar Label unik milik user tertentu
+    @Query("SELECT DISTINCT c.label FROM CashFlow c WHERE c.userId = :userId")
     List<String> findDistinctLabelsByUserId(@Param("userId") UUID userId);
-
-    // Menghapus cash flow berdasarkan ID dan user ID
-    void deleteByIdAndUserId(UUID id, UUID userId);
 }

@@ -1,95 +1,78 @@
 package org.delcom.app.entities;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class CashFlowTests {
-    
+
     @Test
     @DisplayName("Membuat instance dari kelas CashFlow")
     void testMembuatInstanceCashFlow() throws Exception {
-        UUID userId = UUID.randomUUID();
-
-        // CashFlow tipe Inflow
+        
+        // Skenario 1: CashFlow dengan Constructor Lengkap
         {
-            CashFlow cashFlow = new CashFlow(
-                userId, 
-                "Inflow", 
-                "Gaji", 
-                "Pendapatan", 
-                5000000L, 
-                "Gaji bulan Januari"
-            );
+            UUID userId = UUID.randomUUID();
+            CashFlow cashFlow = new CashFlow(userId, "Inflow", "Gaji", "gaji-bulanan", 400000,
+                    "Menerima gaji bulanan dari perusahaan.");
 
-            assert (cashFlow.getUserId().equals(userId));
-            assert (cashFlow.getType().equals("Inflow"));
-            assert (cashFlow.getSource().equals("Gaji"));
-            assert (cashFlow.getLabel().equals("Pendapatan"));
-            assert (cashFlow.getAmount().equals(5000000L));
-            assert (cashFlow.getDescription().equals("Gaji bulan Januari"));
+            // Pengecekan menggunakan JUnit Assertions
+            assertEquals(userId, cashFlow.getUserId()); // Cek apakah userId tersimpan
+            assertEquals("Inflow", cashFlow.getType());
+            assertEquals("Gaji", cashFlow.getSource());
+            assertEquals("gaji-bulanan", cashFlow.getLabel());
+            assertEquals(400000, cashFlow.getAmount());
+            assertEquals("Menerima gaji bulanan dari perusahaan.", cashFlow.getDescription());
         }
 
-        // CashFlow tipe Outflow
-        {
-            CashFlow cashFlow = new CashFlow(
-                userId, 
-                "Outflow", 
-                "Belanja", 
-                "Kebutuhan", 
-                500000L, 
-                "Belanja bulanan"
-            );
-
-            assert (cashFlow.getUserId().equals(userId));
-            assert (cashFlow.getType().equals("Outflow"));
-            assert (cashFlow.getSource().equals("Belanja"));
-            assert (cashFlow.getLabel().equals("Kebutuhan"));
-            assert (cashFlow.getAmount().equals(500000L));
-            assert (cashFlow.getDescription().equals("Belanja bulanan"));
-        }
-
-        // CashFlow dengan nilai default
+        // Skenario 2: CashFlow dengan nilai default
         {
             CashFlow cashFlow = new CashFlow();
 
-            assert (cashFlow.getId() == null);
-            assert (cashFlow.getUserId() == null);
-            assert (cashFlow.getType() == null);
-            assert (cashFlow.getSource() == null);
-            assert (cashFlow.getLabel() == null);
-            assert (cashFlow.getAmount() == null);
-            assert (cashFlow.getDescription() == null);
-            assert (cashFlow.getCover() == null);
+            assertNull(cashFlow.getId());
+            assertNull(cashFlow.getUserId()); // userId juga harus null
+            assertNull(cashFlow.getType());
+            assertNull(cashFlow.getSource());
+            assertNull(cashFlow.getLabel());
+            assertNull(cashFlow.getAmount());
+            assertNull(cashFlow.getDescription());
+            assertNull(cashFlow.getCreatedAt());
+            assertNull(cashFlow.getUpdatedAt());
         }
 
-        // CashFlow dengan setNilai
+        // Skenario 3: CashFlow dengan Setter
         {
             CashFlow cashFlow = new CashFlow();
             UUID generatedId = UUID.randomUUID();
-            
+            UUID generatedUserId = UUID.randomUUID(); // UUID untuk user
+
             cashFlow.setId(generatedId);
-            cashFlow.setUserId(userId);
-            cashFlow.setType("Inflow");
-            cashFlow.setSource("Investasi");
-            cashFlow.setLabel("Passive Income");
-            cashFlow.setAmount(1000000L);
-            cashFlow.setDescription("Dividen saham");
-            cashFlow.setCover("/cashflow-cover.png");
+            cashFlow.setUserId(generatedUserId); // Set userId
+            cashFlow.setType("Set Type");
+            cashFlow.setSource("Set Source");
+            cashFlow.setLabel("Set Label");
+            cashFlow.setAmount(500000);
+            cashFlow.setDescription("Set Description");
+            
+            // Simulasi PrePersist dan PreUpdate
             cashFlow.onCreate();
             cashFlow.onUpdate();
 
-            assert (cashFlow.getId().equals(generatedId));
-            assert (cashFlow.getUserId().equals(userId));
-            assert (cashFlow.getType().equals("Inflow"));
-            assert (cashFlow.getSource().equals("Investasi"));
-            assert (cashFlow.getLabel().equals("Passive Income"));
-            assert (cashFlow.getAmount().equals(1000000L));
-            assert (cashFlow.getDescription().equals("Dividen saham"));
-            assert (cashFlow.getCover().equals("/cashflow-cover.png"));
-            assert (cashFlow.getCreatedAt() != null);
-            assert (cashFlow.getUpdatedAt() != null);
+            assertEquals(generatedId, cashFlow.getId());
+            assertEquals(generatedUserId, cashFlow.getUserId()); // Verifikasi userId
+            assertEquals("Set Type", cashFlow.getType());
+            assertEquals("Set Source", cashFlow.getSource());
+            assertEquals("Set Label", cashFlow.getLabel());
+            assertEquals(500000, cashFlow.getAmount());
+            assertEquals("Set Description", cashFlow.getDescription());
+            
+            assertNotNull(cashFlow.getCreatedAt());
+            assertNotNull(cashFlow.getUpdatedAt());
         }
     }
 }

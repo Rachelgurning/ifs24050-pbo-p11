@@ -17,66 +17,49 @@ public class CashFlowService {
         this.cashFlowRepository = cashFlowRepository;
     }
 
-    // Membuat cash flow baru
-    public CashFlow createCashFlow(UUID userId, String type, String source, String label, Long amount, String description) {
+    @Transactional
+    public CashFlow createCashFlow(UUID userId, String type, String source, String label, Integer amount, String description) {
+        // Menambahkan userId ke constructor
         CashFlow cashFlow = new CashFlow(userId, type, source, label, amount, description);
         return cashFlowRepository.save(cashFlow);
     }
 
-    // Mendapatkan semua cash flow berdasarkan user ID dengan opsi pencarian
     public List<CashFlow> getAllCashFlows(UUID userId, String search) {
-        if (search != null && !search.isEmpty()) {
-            return cashFlowRepository.findByUserIdWithSearch(userId, search);
+        if (search != null && !search.trim().isEmpty()) {
+            return cashFlowRepository.findByKeyword(userId, search);
         }
         return cashFlowRepository.findByUserId(userId);
     }
 
-    // Mendapatkan cash flow berdasarkan ID
     public CashFlow getCashFlowById(UUID userId, UUID id) {
-        return cashFlowRepository.findByIdAndUserId(id, userId).orElse(null);
+        return cashFlowRepository.findByUserIdAndId(userId, id).orElse(null);
     }
-
-    // Mendapatkan semua label unik
-    public List<String> getAllLabels(UUID userId) {
+    
+    public List<String> getCashFlowLabels(UUID userId) {
         return cashFlowRepository.findDistinctLabelsByUserId(userId);
     }
 
-    // Memperbarui cash flow
-    public CashFlow updateCashFlow(UUID userId, UUID id, String type, String source, String label, Long amount, String description) {
-        CashFlow existingCashFlow = cashFlowRepository.findByIdAndUserId(id, userId).orElse(null);
-        if (existingCashFlow == null) {
-            return null;
-        }
-
-        existingCashFlow.setType(type);
-        existingCashFlow.setSource(source);
-        existingCashFlow.setLabel(label);
-        existingCashFlow.setAmount(amount);
-        existingCashFlow.setDescription(description);
-
-        return cashFlowRepository.save(existingCashFlow);
-    }
-
-    // ==========================
-    // Method untuk update cover
-    // ==========================
-    public void updateCover(UUID id, String fileName) {
-        CashFlow cashFlow = cashFlowRepository.findById(id).orElse(null);
+    @Transactional
+    public CashFlow updateCashFlow(UUID userId, UUID id, String type, String source, String label, Integer amount, String description) {
+        CashFlow cashFlow = cashFlowRepository.findByUserIdAndId(userId, id).orElse(null);
         if (cashFlow != null) {
-            cashFlow.setCover(fileName);
-            cashFlowRepository.save(cashFlow);
+            cashFlow.setType(type);
+            cashFlow.setSource(source);
+            cashFlow.setLabel(label);
+            cashFlow.setAmount(amount);
+            cashFlow.setDescription(description);
+            return cashFlowRepository.save(cashFlow);
         }
+        return null;
     }
 
-    // Menghapus cash flow
     @Transactional
     public boolean deleteCashFlow(UUID userId, UUID id) {
-        CashFlow existingCashFlow = cashFlowRepository.findByIdAndUserId(id, userId).orElse(null);
-        if (existingCashFlow == null) {
+        CashFlow cashFlow = cashFlowRepository.findByUserIdAndId(userId, id).orElse(null);
+        if (cashFlow == null) {
             return false;
         }
-
-        cashFlowRepository.deleteByIdAndUserId(id, userId);
+        cashFlowRepository.deleteById(id);
         return true;
     }
 }

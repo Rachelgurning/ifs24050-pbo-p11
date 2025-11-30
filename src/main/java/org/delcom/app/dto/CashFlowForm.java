@@ -1,22 +1,39 @@
 package org.delcom.app.dto;
 
 import java.util.UUID;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class CashFlowForm {
 
     private UUID id;
-    private String type; // "Inflow" atau "Outflow"
-    private String source;
-    private String label;
-    private Long amount;
-    private String description;
-    private String confirmSource; // Untuk konfirmasi saat delete
 
-    // Constructor
+    @NotBlank(message = "Tipe transaksi harus dipilih")
+    private String type;
+
+    @NotBlank(message = "Sumber harus diisi")
+    private String source;
+
+    @NotBlank(message = "Label harus diisi")
+    private String label;
+
+    @NotNull(message = "Nominal harus diisi")
+    @Min(value = 1, message = "Nominal harus lebih dari 0")
+    private Integer amount;
+
+    @NotBlank(message = "Deskripsi harus diisi")
+    private String description;
+
+    // Tambahan untuk fitur hapus (mirip TodoForm confirmTitle)
+    // Walaupun di HTML kita pakai confirm dialog JS, ini good practice untuk validasi backend.
+    private String confirmLabel; 
+
     public CashFlowForm() {
     }
 
-    // Getters and Setters
+    // --- Getters and Setters ---
+
     public UUID getId() {
         return id;
     }
@@ -49,11 +66,11 @@ public class CashFlowForm {
         this.label = label;
     }
 
-    public Long getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 
@@ -64,12 +81,12 @@ public class CashFlowForm {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public String getConfirmSource() {
-        return confirmSource;
+    
+    public String getConfirmLabel() {
+        return confirmLabel;
     }
 
-    public void setConfirmSource(String confirmSource) {
-        this.confirmSource = confirmSource;
+    public void setConfirmLabel(String confirmLabel) {
+        this.confirmLabel = confirmLabel;
     }
 }
