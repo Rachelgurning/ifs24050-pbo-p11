@@ -21,17 +21,17 @@
 		<java.version>25</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<!-- Versi plugin -->
+		<!-- Versi plugin yang digunakan -->
 		<maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
 		<maven.jacoco.plugin.version>0.8.14</maven.jacoco.plugin.version>
-		<!-- Versi dependency -->
+		<!-- Versi dependency yang digunakan -->
 		<maven.dependency.mockito.version>5.20.0</maven.dependency.mockito.version>
 		<maven.dependency.jakarta.servlet-api.version>6.1.0</maven.dependency.jakarta.servlet-api.version>
 		<maven.dependency.jjwt.version>0.13.0</maven.dependency.jjwt.version>
 	</properties>
 
 	<dependencies>
-		<!-- JUnit Vintage Engine -->
+		<!-- Dependency for JUnit Vintage Engine -->
 		<dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>
@@ -44,59 +44,65 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Spring Boot Starters -->
+		<!-- Dependency for Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
+		<!-- Dependency for Thymeleaf Layout Dialect -->
 		<dependency>
 			<groupId>nz.net.ultraq.thymeleaf</groupId>
 			<artifactId>thymeleaf-layout-dialect</artifactId>
 			<version>3.4.0</version>
 		</dependency>
 
+		<!-- Dependency for Spring Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Spring Boot Starter Security -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- Dependency for Thymeleaf -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
+		<!-- Dependency for Spring Boot Validation -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- TEST DEPENDENCIES (Pastikan tidak ada webmvc-test yang typo) -->
+		<!-- Dependency for Spring Boot Web MVC Test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Dependency for Spring Boot Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Dependency for Spring Security Test -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<version>${maven.dependency.mockito.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Tools & Database -->
+		<!-- Dependency for Spring Boot DevTools -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -104,11 +110,21 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Dependency for Spring Security -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
 		</dependency>
 
+		<!-- Depedency for mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${maven.dependency.mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Jakarta Servlet API -->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -116,24 +132,27 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Dependency for Spring Data JPA and PostgreSQL -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
+		<!-- Dependency for PostgreSQL -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- JWT Dependencies -->
+		<!-- Dependency for JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
 			<version>${maven.dependency.jjwt.version}</version>
 		</dependency>
 
+		<!-- Dependency for JWT Implementation -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
@@ -141,6 +160,7 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Dependency for JWT Jackson Parser -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
@@ -164,6 +184,7 @@
 				</executions>
 			</plugin>
 
+			<!-- dependency plugin tetap jika diperlukan -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -176,27 +197,21 @@
 				</executions>
 			</plugin>
 
-			<!-- Compiler Plugin (NORMAL: Tidak ada excludes lagi) -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-
-			<!-- Surefire Plugin -->
+			<!-- Surefire plugin untuk menjalankan test -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${maven.surefire.plugin.version}</version>
 			</plugin>
 
-			<!-- Report Plugin -->
+			<!-- Plugin untuk membuat laporan HTML dari hasil test -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>${maven.surefire.plugin.version}</version>
 			</plugin>
 
-			<!-- JaCoCo Plugin -->
+			<!-- JaCoCo Plugin (coverage) tetap -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -225,7 +240,7 @@
 				</executions>
 				<configuration>
 					<excludes>
-						<!-- Hanya exclude folder util/view bawaan, FILE LAIN TETAP DINILAI -->
+						<!-- Exclude specific classes -->
 						<exclude>**/utils/**</exclude>
 						<exclude>**/views/**</exclude>
 					</excludes>
@@ -234,16 +249,15 @@
 						<rule>
 							<element>BUNDLE</element>
 							<limits>
-								<!-- Limit tetap 0.0 supaya BUILD SUCCESS, tapi nilai asli akan muncul di laporan -->
 								<limit>
 									<counter>INSTRUCTION</counter>
 									<value>COVEREDRATIO</value>
-									<minimum>0.0</minimum>
+									<minimum>1.0</minimum>
 								</limit>
 								<limit>
 									<counter>BRANCH</counter>
 									<value>COVEREDRATIO</value>
-									<minimum>0.0</minimum>
+									<minimum>1.0</minimum>
 								</limit>
 							</limits>
 						</rule>

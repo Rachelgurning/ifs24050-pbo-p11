@@ -2,8 +2,8 @@ package org.delcom.app.services;
 
 import org.delcom.app.entities.CashFlow;
 import org.delcom.app.repositories.CashFlowRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -11,50 +11,72 @@ import java.util.UUID;
 @Service
 public class CashFlowService {
 
-    @Autowired
-    private CashFlowRepository cashFlowRepository;
+    private final CashFlowRepository cashFlowRepository;
 
-    // Ambil semua data milik user tertentu
-    public List<CashFlow> getAllCashFlows(UUID userId, String keyword) {
+    public CashFlowService(CashFlowRepository cashFlowRepository) {
+        this.cashFlowRepository = cashFlowRepository;
+    }
+
+    // Membuat cash flow baru
+    public CashFlow createCashFlow(UUID userId, String type, String source, String label, Long amount, String description) {
+        CashFlow cashFlow = new CashFlow(userId, type, source, label, amount, description);
+        return cashFlowRepository.save(cashFlow);
+    }
+
+    // Mendapatkan semua cash flow berdasarkan user ID dengan opsi pencarian
+    public List<CashFlow> getAllCashFlows(UUID userId, String search) {
+        if (search != null && !search.isEmpty()) {
+            return cashFlowRepository.findByUserIdWithSearch(userId, search);
+        }
         return cashFlowRepository.findByUserId(userId);
     }
 
-    // Tambah Data Baru
-    public CashFlow createCashFlow(UUID userId, String type, String source, String label, Integer amount, String description) {
-        CashFlow flow = new CashFlow(
-            userId, 
-            type, 
-            source, 
-            label, 
-            Double.valueOf(amount), // Konversi int ke double
-            description
-        );
-        return cashFlowRepository.save(flow);
+    // Mendapatkan cash flow berdasarkan ID
+    public CashFlow getCashFlowById(UUID userId, UUID id) {
+        return cashFlowRepository.findByIdAndUserId(id, userId).orElse(null);
     }
 
-    // Update Data
-    public CashFlow updateCashFlow(UUID id, UUID userId, String type, String source, String label, Integer amount, String description) {
-        CashFlow flow = cashFlowRepository.findById(id).orElse(null);
-        
-        // Pastikan data ada dan milik user yang benar
-        if (flow != null && flow.getUserId().equals(userId)) {
-            flow.setType(type);
-            flow.setSource(source);
-            flow.setLabel(label);
-            flow.setAmount(Double.valueOf(amount));
-            flow.setDescription(description);
-            return cashFlowRepository.save(flow);
-        }
-        return null;
+    // Mendapatkan semua label unik
+    public List<String> getAllLabels(UUID userId) {
+        return cashFlowRepository.findDistinctLabelsByUserId(userId);
     }
 
-    // Hapus Data
-    public boolean deleteCashFlow(UUID id, UUID userId) {
-        CashFlow flow = cashFlowRepository.findById(id).orElse(null);
-        if (flow != null && flow.getUserId().equals(userId)) {
-            cashFlowRepository.delete(flow);
-            return true;
+    // Memperbarui cash flow
+    public CashFlow updateCashFlow(UUID userId, UUID id, String type, String source, String label, Long amount, String description) {
+        CashFlow existingCashFlow = cashFlowRepository.findByIdAndUserId(id, userId).orElse(null);
+        if (existingCashFlow == null) {
+            return null;
         }
-        return false;
+
+        existingCashFlow.setType(type);
+        existingCashFlow.setSource(source);
+        existingCashFlow.setLabel(label);
+        existingCashFlow.setAmount(amount);
+        existingCashFlow.setDescription(description);
+
+        return cashFlowRepository.save(existingCashFlow);
+    }
+
+    // ==========================
+    // Method untuk update cover
+    // ==========================
+    public void updateCover(UUID id, String fileName) {
+        CashFlow cashFlow = cashFlowRepository.findById(id).orElse(null);
+        if (cashFlow != null) {
+            cashFlow.setCover(fileName);
+            cashFlowRepository.save(cashFlow);
+        }
+    }
+
+    // Menghapus cash flow
+    @Transactional
+    public boolean deleteCashFlow(UUID userId, UUID id) {
+        CashFlow existingCashFlow = cashFlowRepository.findByIdAndUserId(id, userId).orElse(null);
+        if (existingCashFlow == null) {
+            return false;
+        }
+
+        cashFlowRepository.deleteByIdAndUserId(id, userId);
+        return true;
     }
 }
